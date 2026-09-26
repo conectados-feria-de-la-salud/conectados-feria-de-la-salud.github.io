@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mesa de salida · Feria de la Salud 2026</title>
+<style>
+  :root {
+    /* Marca Conectados */
+    --azul: #2c2e72;
+    --azul-hover: #23255c;
+    --azul-suave: #eceef7;
+    --amarillo: #fdda2e;
+    --amarillo-suave: #fff9e0;
+
+    /* Semáforo de resultados: independiente de la marca, para que se lea */
+    --verde: #1f6f4a;
+    --verde-claro: #e6f4ec;
+    --ambar: #8a6100;
+    --ambar-claro: #fdf3d8;
+    --rojo: #b3261e;
+    --rojo-claro: #fceceb;
+
+    --texto: #1b1c1e;
+    --suave: #6b6f76;
+    --borde: #d9dce1;
+    --fondo: #f4f6f8;
+    --panel: #ffffff;
+    --radio: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--texto);
+    background: var(--fondo);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .contenedor { max-width: 720px; margin: 0 auto; padding: 16px 16px 64px; }
+  .contenedor.ancho { max-width: 1040px; }
+
+  /* Cabecera de marca: logo sobre blanco y franja amarilla */
+  header.barra {
+    background: #fff;
+    border-bottom: 4px solid var(--amarillo);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header.barra .logo { height: 26px; width: auto; flex: none; }
+  header.barra .barra-txt { min-width: 0; }
+  header.barra .titulo {
+    font-weight: 700; font-size: 14px; line-height: 1.25; color: var(--azul);
+  }
+  header.barra .sub { font-size: 12px; color: var(--suave); }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .panel.marca { background: var(--azul-suave); border-color: #ccd0e8; }
+
+  h1 { font-size: 22px; margin: 0 0 4px; color: var(--azul); }
+  h2 { font-size: 18px; margin: 0 0 10px; color: var(--azul); }
+  h3 { font-size: 15px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); }
+  p.nota { color: var(--suave); font-size: 14px; margin: 4px 0 0; }
+
+  label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+  .ayuda { font-weight: 400; color: var(--suave); font-size: 13px; margin-top: 3px; }
+
+  input, select, textarea, button { font: inherit; font-family: inherit; }
+
+  input[type=text], input[type=number], input[type=tel], input[type=email], select, textarea {
+    width: 100%;
+    padding: 13px 12px;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--texto);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--azul);
+    outline-offset: 1px;
+    border-color: var(--azul);
+  }
+  textarea { min-height: 72px; resize: vertical; }
+
+  /* El campo de código va en mayúsculas, pero el ejemplo se lee mejor normal */
+  input::placeholder, textarea::placeholder {
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+    font-size: 15px;
+    color: #9aa0a6;
+    opacity: 1;
+  }
+
+  .campo { margin-bottom: 16px; }
+  .fila { display: flex; gap: 12px; flex-wrap: wrap; }
+  .fila > * { flex: 1 1 160px; }
+
+  button, .boton {
+    display: inline-block;
+    padding: 14px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--azul);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+  }
+  button:active { transform: translateY(1px); }
+  button[disabled] { opacity: .5; cursor: not-allowed; }
+  button.ancho, .boton.ancho { display: block; width: 100%; }
+  button.gris { background: #e6e8eb; color: var(--texto); }
+  button.rojo { background: var(--rojo); }
+  button.grande { padding: 18px; font-size: 18px; }
+  /* Acción destacada en amarillo de marca, con texto azul para que se lea */
+  button.acento { background: var(--amarillo); color: var(--azul); }
+
+  .segmentos { display: flex; gap: 8px; flex-wrap: wrap; }
+  .segmentos button {
+    flex: 1 1 60px;
+    background: #fff;
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    padding: 12px 8px;
+  }
+  .segmentos button.activo { background: var(--azul); color: #fff; border-color: var(--azul); }
+
+  .semaforo { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .semaforo.verde { background: var(--verde-claro); color: var(--verde); }
+  .semaforo.amarillo { background: var(--ambar-claro); color: var(--ambar); }
+  .semaforo.rojo { background: var(--rojo-claro); color: var(--rojo); }
+  .semaforo.gris { background: #eceef1; color: var(--suave); }
+
+  .aviso { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 15px; }
+  .aviso.error { background: var(--rojo-claro); color: var(--rojo); border: 1px solid #f0c4c1; }
+  .aviso.exito { background: var(--verde-claro); color: var(--verde); border: 1px solid #bfe0cd; }
+  .aviso.alerta { background: var(--ambar-claro); color: var(--ambar); border: 1px solid #ecd9a2; }
+
+  .codigo-grande {
+    font: 700 40px/1.1 ui-monospace, "SF Mono", Consolas, monospace;
+    letter-spacing: .12em;
+    text-align: center;
+    color: var(--azul);
+    margin: 8px 0;
+  }
+  .puntos-grande { font: 700 52px/1 system-ui; color: var(--azul); text-align: center; }
+
+  .lista { list-style: none; padding: 0; margin: 0; }
+  .lista li {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 11px 0; border-bottom: 1px solid var(--borde);
+  }
+  .lista li:last-child { border-bottom: 0; }
+  .lista .val { font-weight: 600; text-align: right; white-space: nowrap; }
+
+  .oculto { display: none !important; }
+  .cargando { text-align: center; color: var(--suave); padding: 28px; }
+
+
+  #video-qr { width: 100%; border-radius: 10px; background: #000; max-height: 46vh; object-fit: cover; }
+
+  .chip { display: inline-block; background: #eceef1; color: var(--suave); border-radius: 999px; padding: 3px 10px; font-size: 12px; margin: 0 4px 4px 0; }
+  .chip.hecho { background: var(--azul-suave); color: var(--azul); }
+
+  .credencial {
+    border: 2px dashed #9aa0a6; border-radius: 12px; padding: 16px; text-align: center; background: #fff;
+  }
+  .credencial .logo { height: 26px; width: auto; margin-bottom: 8px; }
+
+  @media print {
+    body { background: #fff; }
+    header.barra, .no-imprimir { display: none !important; }
+    .panel { border: 0; padding: 0; }
+    .credencial { border: 2px dashed #333; }
+  }
+</style>
+
+</head>
+<body>
+<!-- Mesa de salida: recorrido de la persona y boleto para la tómbola (todos reciben uno) -->
+
+<header class="barra no-imprimir">
+  <img class="logo" src="data:image/png;base64,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" alt="Conectados">
+  <div class="barra-txt">
+    <div class="titulo nombre-feria">Feria de la Salud 2026</div>
+    <div class="sub">Mesa de salida y tómbola</div>
+  </div>
+</header>
+
+<div class="contenedor">
+
+  <!-- PIN -->
+  <div id="pantalla-pin" class="panel">
+    <h1>Mesa de salida</h1>
+    <p class="nota">Escribí el PIN de la mesa para empezar.</p>
+    <div id="aviso-pin" class="aviso error oculto"></div>
+    <div class="campo" style="margin-top:14px">
+      <label for="pin">PIN</label>
+      <input type="text" id="pin" inputmode="numeric" autocomplete="off" placeholder="••••••">
+    </div>
+    <div class="campo">
+      <label for="voluntario">Tu nombre</label>
+      <input type="text" id="voluntario" autocomplete="off">
+    </div>
+    <button id="btn-pin" class="ancho grande">Entrar</button>
+  </div>
+
+  <!-- Buscar -->
+  <div id="pantalla-buscar" class="oculto">
+    <div class="panel">
+      <h2>Buscar el pasaporte</h2>
+      <div id="aviso-buscar" class="aviso error oculto"></div>
+
+      <div id="zona-camara" class="oculto" style="margin:12px 0">
+        <video id="video-qr" playsinline muted></video>
+        <p class="nota" id="pista-camara" style="text-align:center"></p>
+      </div>
+      <button id="btn-camara" class="ancho grande" style="margin-bottom:12px">📷 Escanear QR</button>
+
+      <div class="campo">
+        <label for="codigo">o escribí el código</label>
+        <input type="text" id="codigo" autocomplete="off" autocapitalize="characters" maxlength="8"
+               placeholder="Ej: K7M2P"
+               style="text-transform:uppercase;font:700 26px/1.2 ui-monospace,monospace;letter-spacing:.1em;text-align:center">
+      </div>
+      <button id="btn-buscar" class="ancho">Ver recuento</button>
+    </div>
+  </div>
+
+  <!-- Recuento -->
+  <div id="pantalla-recuento" class="oculto">
+    <div class="panel">
+      <h2 id="r-nombre"></h2>
+      <p class="nota" id="r-codigo"></p>
+      <div class="nota" style="text-align:center;font-size:16px" id="r-desglose"></div>
+      <div id="r-aviso" class="aviso oculto" style="margin-top:14px"></div>
+      <h3 style="margin-top:18px">Recorrido</h3>
+      <ul class="lista" id="r-detalle"></ul>
+    </div>
+    <button id="btn-emitir" class="ancho grande" style="margin-bottom:10px">Emitir boleto de tómbola</button>
+    <button id="btn-otro-1" class="ancho gris">Buscar a otra persona</button>
+  </div>
+
+  <!-- Boleto -->
+  <div id="pantalla-boleto" class="oculto">
+    <div class="panel">
+      <div class="credencial">
+        <img class="logo" src="data:image/png;base64,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" alt="Conectados">
+        <div style="font-size:13px;color:var(--suave);letter-spacing:.06em;text-transform:uppercase">
+          <span class="nombre-feria">Feria de la Salud 2026</span> · Boleto de tómbola
+        </div>
+        <div id="b-nombre" style="font-size:20px;font-weight:700;margin:8px 0 0"></div>
+        <div id="b-codigo" class="nota" style="margin-bottom:10px"></div>
+        <div style="font-size:13px;color:var(--suave)">Folio</div>
+        <div id="b-folio" class="codigo-grande" style="font-size:34px"></div>
+        <div id="b-desglose" class="nota" style="margin-top:8px"></div>
+        <div style="margin-top:14px"><img id="b-qr" onerror="this.style.display='none'" alt="QR del boleto" width="150" height="150"></div>
+        <p style="font-size:12px;color:var(--suave);margin:10px 0 0">
+          Folio único e intransferible. Ya quedó anotado en el sistema: no hace
+          falta papel para participar en la tómbola.
+        </p>
+      </div>
+    </div>
+    <div class="no-imprimir">
+      <div class="aviso alerta">Mostrale la pantalla y decile su número de credencial.
+        Para el sorteo no se necesita el papel: todos los folios quedan en la hoja de cálculo.</div>
+      <button id="btn-imprimir" class="ancho gris" style="margin-bottom:10px">Imprimir boleto (si hay impresora)</button>
+      <button id="btn-otro-2" class="ancho gris">Atender a otra persona</button>
+    </div>
+  </div>
+
+</div>
+
+<script>window.API_URL = "https://script.google.com/macros/s/AKfycbxF9LnY2piYLj9748Q9EzXob-qpol6aUPfeem6EPFs789rJAgxKpJPDe8p0cqO5twhtiA/exec";</script>
+<script>
+  // ---------------------------------------------------------------------
+  // Utilidades compartidas por todas las pantallas
+  // ---------------------------------------------------------------------
+
+  function $(sel) { return document.querySelector(sel); }
+  function $$(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+
+  function esc(s) {
+    return String(s === null || s === undefined ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  /**
+   * Llama al servidor devolviendo una promesa.
+   * Dentro de Apps Script usa google.script.run. En las pantallas de GitHub
+   * Pages (que definen window.API_URL) manda un POST a la app publicada, que
+   * ejecuta la misma función con los mismos controles.
+   */
+  function servidor(fn, args) {
+    if (window.API_URL) return servidorPorPost(fn, args);
+    return new Promise(function (resolve, reject) {
+      google.script.run
+        .withSuccessHandler(function (r) {
+          if (r && r.ok === false) reject(new Error(r.error || 'Error desconocido'));
+          else resolve(r);
+        })
+        .withFailureHandler(function (e) {
+          reject(new Error(e && e.message ? e.message : 'Se perdió la conexión. Revisá el internet e intentá otra vez.'));
+        })[fn].apply(null, args || []);
+    });
+  }
+
+  function servidorPorPost(fn, args) {
+    // Sin encabezados propios: así es un pedido "simple" y el navegador no
+    // hace la consulta previa de CORS, que Apps Script no sabe responder.
+    return fetch(window.API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'api', fn: fn, args: args || [] })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('El servidor respondió ' + r.status + '.');
+      return r.json();
+    }, function () {
+      throw new Error('Se perdió la conexión. Revisá el internet e intentá otra vez.');
+    }).then(function (r) {
+      if (!r || r.ok === false) throw new Error((r && r.error) || 'Error desconocido');
+      return r;
+    });
+  }
+
+  // En GitHub Pages el nombre de la feria viene de la configuración de la hoja
+  if (window.API_URL) {
+    document.addEventListener('DOMContentLoaded', function () {
+      servidor('apiInfo').then(function (r) {
+        if (!r.nombreFeria) return;
+        document.title = r.nombreFeria;
+        $$('.nombre-feria').forEach(function (el) { el.textContent = r.nombreFeria; });
+      }).catch(function () {});
+    });
+  }
+
+  function mostrarAviso(contenedor, tipo, texto) {
+    var el = typeof contenedor === 'string' ? $(contenedor) : contenedor;
+    if (!el) return;
+    el.className = 'aviso ' + tipo;
+    el.innerHTML = esc(texto);
+    el.classList.remove('oculto');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function limpiarAviso(contenedor) {
+    var el = typeof contenedor === 'string' ? $(contenedor) : contenedor;
+    if (el) el.classList.add('oculto');
+  }
+
+  function ocupado(boton, si, textoOcupado) {
+    if (!boton) return;
+    if (si) {
+      boton.dataset.textoOriginal = boton.textContent;
+      boton.textContent = textoOcupado || 'Guardando...';
+      boton.disabled = true;
+    } else {
+      if (boton.dataset.textoOriginal) boton.textContent = boton.dataset.textoOriginal;
+      boton.disabled = false;
+    }
+  }
+
+  function vibrar(ms) {
+    if (navigator.vibrate) { try { navigator.vibrate(ms || 60); } catch (e) {} }
+  }
+
+  /** Guarda el nombre del voluntario en el propio dispositivo. */
+  function voluntarioGuardado() {
+    try { return localStorage.getItem('feria_voluntario') || ''; } catch (e) { return ''; }
+  }
+  function guardarVoluntario(v) {
+    try { localStorage.setItem('feria_voluntario', v || ''); } catch (e) {}
+  }
+  function pinGuardado() {
+    try { return localStorage.getItem('feria_pin') || ''; } catch (e) { return ''; }
+  }
+  function guardarPin(v) {
+    try { localStorage.setItem('feria_pin', v || ''); } catch (e) {}
+  }
+
+  // ---------------------------------------------------------------------
+  // Escanear QR
+  //
+  // Google no le da permiso de cámara al marco donde corre una app de Apps
+  // Script (su lista "allow" no incluye "camera"). Por eso hay dos modos:
+  //
+  //   - Cámara en vivo: en las pantallas de GitHub Pages, que no corren
+  //     dentro de ese marco.
+  //   - Foto: dentro de Apps Script. El celular abre SU cámara, se saca la
+  //     foto y acá se lee el QR de la imagen.
+  //
+  // Si nada funciona, queda escribir el código, que va impreso en grande.
+  // ---------------------------------------------------------------------
+
+  var forzarFoto = false;   // si la cámara en vivo falló una vez, se pasa a foto
+
+  function camaraEnVivoPosible() {
+    if (forzarFoto || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return false;
+    if (document.featurePolicy && document.featurePolicy.allowsFeature) {
+      return document.featurePolicy.allowsFeature('camera');
+    }
+    // Safari no tiene featurePolicy: dentro de un marco ajeno no hay cámara
+    return window.top === window;
+  }
+
+  function textoBotonEscanear() {
+    return camaraEnVivoPosible() ? '📷 Escanear QR' : '📷 Sacarle foto al QR';
+  }
+
+  /** La cámara en vivo: lee continuamente hasta encontrar el QR del pasaporte. */
+  var CamaraVivo = (function () {
+    var stream = null, video = null, detector = null, corriendo = false;
+
+    function iniciar(elVideo, alLeer, alFallar, alVerResultados) {
+      video = elVideo;
+      detector = null;
+      var prep = ('BarcodeDetector' in window)
+        ? Promise.resolve().then(function () { detector = new BarcodeDetector({ formats: ['qr_code'] }); })
+        : cargarJsQR();
+      prep.then(function () {
+        return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 } } });
+      }).then(function (s) {
+        stream = s;
+        video.srcObject = s;
+        video.setAttribute('playsinline', 'true');
+        return video.play();
+      }).then(function () {
+        corriendo = true;
+        bucle(alLeer, alVerResultados);
+      }).catch(function (e) {
+        detener();
+        alFallar(e);
+      });
+    }
+
+    /** Si solo se ve el QR de resultados, avisa y sigue buscando. */
+    function bucle(alLeer, alVerResultados) {
+      if (!corriendo) return;
+      var siguiente = function () { setTimeout(function () { bucle(alLeer, alVerResultados); }, 200); };
+      var revisar = function (textos) {
+        var pase = textos.filter(function (t) { return !esQRResultados(t); })[0];
+        if (pase) { alLeer(pase); return; }
+        if (textos.length && alVerResultados) alVerResultados();
+        siguiente();
+      };
+      if (detector) {
+        detector.detect(video).then(function (cs) {
+          revisar(cs.map(function (c) { return c.rawValue; }));
+        }).catch(siguiente);
+        return;
+      }
+      if (window.jsQR && video.videoWidth) {
+        var c = document.createElement('canvas');
+        c.width = video.videoWidth; c.height = video.videoHeight;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(video, 0, 0, c.width, c.height);
+        var d = ctx.getImageData(0, 0, c.width, c.height);
+        var r = window.jsQR(d.data, d.width, d.height, { inversionAttempts: 'dontInvert' });
+        revisar(r && r.data ? [r.data] : []);
+        return;
+      }
+      siguiente();
+    }
+
+    function detener() {
+      corriendo = false;
+      if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+      if (video) video.srcObject = null;
+    }
+
+    return { iniciar: iniciar, detener: detener };
+  })();
+
+  var escaneoEnCurso = false;
+
+  /**
+   * El botón de escanear de las pantallas. ctl = {boton, zona, video, pista}.
+   * Con cámara en vivo, el primer toque la prende y el segundo la apaga; sin
+   * cámara en vivo, abre la cámara del celular para sacar una foto.
+   */
+  function alternarEscaneo(ctl, alLeer, alFallar) {
+    var terminar = function () {
+      CamaraVivo.detener();
+      escaneoEnCurso = false;
+      ctl.zona.classList.add('oculto');
+      ctl.boton.textContent = textoBotonEscanear();
+    };
+    if (escaneoEnCurso) { terminar(); return; }
+    if (!camaraEnVivoPosible()) { escanearConFoto(ctl.boton, alLeer, alFallar); return; }
+
+    escaneoEnCurso = true;
+    ctl.zona.classList.remove('oculto');
+    ctl.pista.textContent = 'Apuntá al QR de la izquierda de la credencial';
+    ctl.boton.textContent = 'Apagar cámara';
+    CamaraVivo.iniciar(ctl.video, function (texto) {
+      terminar();
+      alLeer(texto);
+    }, function (err) {
+      terminar();
+      forzarFoto = true;   // el próximo toque va a pedir una foto
+      ctl.boton.textContent = textoBotonEscanear();
+      alFallar(new Error('No se pudo usar la cámara en vivo (' + (err && err.message) +
+        '). Tocá el botón otra vez para sacarle una foto al QR.'));
+    }, function () {
+      ctl.pista.textContent = 'Ese es el QR de resultados: apuntá al de la izquierda.';
+    });
+  }
+
+  function cargarJsQR() {
+    return new Promise(function (resolve, reject) {
+      if (window.jsQR) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+      s.onload = function () { window.jsQR ? resolve() : reject(new Error('No se pudo cargar el lector de QR.')); };
+      s.onerror = function () { reject(new Error('No se pudo cargar el lector de QR (¿hay internet?).')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function cargarImagen(archivo) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(archivo);
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('No se pudo abrir la foto.')); };
+      img.src = url;
+    });
+  }
+
+  /**
+   * Todos los QR de la imagen con jsQR, achicada a "lado" px como máximo.
+   * jsQR lee uno por vez: cuando encuentra uno, lo tapa de blanco y vuelve a
+   * buscar. Así salen los dos de la credencial, estén donde estén en la foto.
+   */
+  function jsQRTodos(img, lado) {
+    var escala = Math.min(1, lado / Math.max(img.naturalWidth, img.naturalHeight));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.naturalWidth * escala));
+    c.height = Math.max(1, Math.round(img.naturalHeight * escala));
+    var ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    var textos = [];
+    for (var i = 0; i < 3; i++) {
+      var d = ctx.getImageData(0, 0, c.width, c.height);
+      var r = window.jsQR(d.data, d.width, d.height, { inversionAttempts: 'attemptBoth' });
+      if (!r || !r.data) break;
+      if (textos.indexOf(r.data) < 0) textos.push(r.data);
+      var l = r.location;
+      var xs = [l.topLeftCorner.x, l.topRightCorner.x, l.bottomLeftCorner.x, l.bottomRightCorner.x];
+      var ys = [l.topLeftCorner.y, l.topRightCorner.y, l.bottomLeftCorner.y, l.bottomRightCorner.y];
+      var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+      var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+      var margen = Math.max(x1 - x0, y1 - y0) * 0.2;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x0 - margen, y0 - margen, (x1 - x0) + 2 * margen, (y1 - y0) + 2 * margen);
+    }
+    return textos;
+  }
+
+  /** Devuelve todos los QR que encuentre en la foto (la credencial tiene dos). */
+  function leerQRDeFoto(archivo) {
+    return cargarImagen(archivo).then(function (img) {
+      var conJsQR = function () {
+        return cargarJsQR().then(function () {
+          // Primero achicada (rápido); si no sale nada, con más detalle por si el QR salió chico
+          var textos = jsQRTodos(img, 1200);
+          return textos.length ? textos : jsQRTodos(img, 2400);
+        });
+      };
+      var fin = function (textos) { URL.revokeObjectURL(img.src); return textos; };
+      if (!('BarcodeDetector' in window)) return conJsQR().then(fin);
+      return new BarcodeDetector({ formats: ['qr_code'] }).detect(img).then(function (codigos) {
+        return codigos.length ? codigos.map(function (c) { return c.rawValue; }) : conJsQR();
+      }).catch(conJsQR).then(fin);
+    });
+  }
+
+  var entradaFoto = null;
+
+  /**
+   * Abre la cámara del celular para sacarle una foto al QR.
+   * alLeer(texto) con el QR leído (el del pasaporte, si salieron los dos);
+   * alFallar(error) si no se pudo. Tiene que llamarse desde un toque del
+   * usuario: el navegador solo abre la cámara si es en respuesta a un toque.
+   */
+  function escanearConFoto(boton, alLeer, alFallar) {
+    if (!entradaFoto) {
+      entradaFoto = document.createElement('input');
+      entradaFoto.type = 'file';
+      entradaFoto.accept = 'image/*';
+      entradaFoto.setAttribute('capture', 'environment');
+      entradaFoto.style.display = 'none';
+      document.body.appendChild(entradaFoto);
+    }
+    entradaFoto.value = '';
+    entradaFoto.onchange = function () {
+      var archivo = entradaFoto.files && entradaFoto.files[0];
+      if (!archivo) return;
+      ocupado(boton, true, 'Leyendo la foto...');
+      leerQRDeFoto(archivo).then(function (textos) {
+        if (!textos.length) {
+          throw new Error('No encontré ningún QR en la foto. Probá de nuevo más cerca, con buena luz y con el QR entero.');
+        }
+        var pase = textos.filter(function (t) { return !esQRResultados(t); })[0];
+        alLeer(pase || textos[0]);
+      }).catch(function (e) {
+        alFallar(e);
+      }).then(function () {
+        ocupado(boton, false);
+      });
+    };
+    entradaFoto.click();
+  }
+
+  /** El QR de la derecha de la credencial: abre los resultados, no es un código. */
+  function esQRResultados(texto) {
+    return /[?&]p=mi(&|$)/.test(String(texto || ''));
+  }
+
+  /**
+   * Código del pasaporte a partir de lo que leyó la cámara. Si leyó el QR de
+   * resultados, avisa en lugar de buscar un código que no existe.
+   */
+  function codigoDeQR(texto, aviso) {
+    if (esQRResultados(texto)) {
+      mostrarAviso(aviso, 'alerta', 'Ese es el QR de resultados, el de la derecha. ' +
+        'Escaneá el de la izquierda, el que dice "Para los stands".');
+      return null;
+    }
+    return extraerCodigo(texto);
+  }
+
+  /** El QR puede traer una URL; nos quedamos con el código de 5 letras. */
+  function extraerCodigo(texto) {
+    texto = String(texto || '').trim();
+    var m = texto.match(/[?&]c=([A-Za-z0-9]+)/);
+    if (m) return m[1].toUpperCase();
+    m = texto.match(/([A-Z0-9]{5,8})\s*$/i);
+    return (m ? m[1] : texto).toUpperCase();
+  }
+
+  /**
+   * Dibuja un QR en una imagen, en el propio teléfono: el contenido no se
+   * manda a ningún servicio. Si la librería no carga, la imagen se oculta y
+   * no pasa nada, porque el folio también va escrito.
+   */
+  function pintarQR(img, texto) {
+    var dibujar = function () {
+      var qr = qrcode(0, 'M');
+      qr.addData(String(texto));
+      qr.make();
+      img.style.imageRendering = 'pixelated';
+      img.src = qr.createDataURL(6, 0);
+      img.style.display = '';
+    };
+    if (window.qrcode) { dibujar(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+    s.onload = function () { if (window.qrcode) dibujar(); else img.style.display = 'none'; };
+    s.onerror = function () { img.style.display = 'none'; };
+    document.head.appendChild(s);
+  }
+</script>
+
+<script>
+  var VOLUNTARIO = '';
+  var PIN = '';          // se manda en cada llamada: el servidor lo vuelve a verificar
+  var ESTADO = null;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    $('#voluntario').value = voluntarioGuardado();
+    $('#btn-pin').addEventListener('click', entrar);
+    $('#pin').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
+    $('#btn-camara').textContent = textoBotonEscanear();
+    $('#btn-camara').addEventListener('click', escanear);
+    $('#btn-buscar').addEventListener('click', function () { buscar($('#codigo').value); });
+    $('#codigo').addEventListener('keydown', function (e) { if (e.key === 'Enter') buscar($('#codigo').value); });
+    $('#btn-emitir').addEventListener('click', emitir);
+    $('#btn-imprimir').addEventListener('click', function () { window.print(); });
+    $('#btn-otro-1').addEventListener('click', reiniciar);
+    $('#btn-otro-2').addEventListener('click', reiniciar);
+  });
+
+  function entrar() {
+    var vol = $('#voluntario').value.trim();
+    if (!vol) { mostrarAviso('#aviso-pin', 'error', 'Escribí tu nombre.'); return; }
+    limpiarAviso('#aviso-pin');
+    ocupado($('#btn-pin'), true, 'Verificando...');
+    var pin = $('#pin').value.trim();
+    servidor('apiEntrarMesa', [pin, 'salida']).then(function () {
+      PIN = pin;
+      VOLUNTARIO = vol;
+      guardarVoluntario(vol);
+      $('#pantalla-pin').classList.add('oculto');
+      $('#pantalla-buscar').classList.remove('oculto');
+      $('#codigo').focus();
+    }).catch(function (e) {
+      mostrarAviso('#aviso-pin', 'error', e.message);
+    }).then(function () { ocupado($('#btn-pin'), false); });
+  }
+
+  function escanear() {
+    limpiarAviso('#aviso-buscar');
+    alternarEscaneo({ boton: $('#btn-camara'), zona: $('#zona-camara'), video: $('#video-qr'), pista: $('#pista-camara') }, function (texto) {
+      vibrar(60);
+      var codigo = codigoDeQR(texto, '#aviso-buscar');
+      if (codigo) buscar(codigo);
+    }, function (err) {
+      mostrarAviso('#aviso-buscar', 'alerta', err.message + ' También podés escribir el código.');
+    });
+  }
+
+  function buscar(codigo) {
+    codigo = extraerCodigo(codigo);
+    if (codigo.length < 4) { mostrarAviso('#aviso-buscar', 'error', 'El código tiene 5 caracteres.'); return; }
+    limpiarAviso('#aviso-buscar');
+    ocupado($('#btn-buscar'), true, 'Buscando...');
+
+    servidor('apiEstadoSalida', [PIN, codigo]).then(function (r) {
+      ESTADO = r;
+      $('#r-nombre').textContent = r.participante.nombre;
+      $('#r-codigo').textContent = 'Código ' + r.participante.codigo;
+      $('#r-desglose').textContent = 'Pasó por ' + r.stands + ' de ' + r.totalStands + ' stands';
+
+      var h = '';
+      if (!r.recorrido.length) {
+        h = '<li><span class="nota">Todavía no pasó por ningún stand. Igual recibe su boleto.</span></li>';
+      } else {
+        r.recorrido.forEach(function (d) {
+          h += '<li><span>' + esc(d.nombre) + '</span><span class="val">✓</span></li>';
+        });
+      }
+      $('#r-detalle').innerHTML = h;
+
+      // Todos reciben boleto: no hay mínimo
+      if (r.boleto) {
+        mostrarAviso('#r-aviso', 'alerta', 'Ya tiene boleto emitido: ' + r.boleto.folio + '. Al continuar se muestra el mismo, no se emite otro.');
+        $('#btn-emitir').textContent = 'Ver su boleto';
+      } else {
+        limpiarAviso('#r-aviso');
+        $('#btn-emitir').textContent = 'Emitir boleto de tómbola';
+      }
+
+      $('#pantalla-buscar').classList.add('oculto');
+      $('#pantalla-recuento').classList.remove('oculto');
+      window.scrollTo(0, 0);
+    }).catch(function (e) {
+      mostrarAviso('#aviso-buscar', 'error', e.message);
+    }).then(function () { ocupado($('#btn-buscar'), false); });
+  }
+
+  function emitir() {
+    ocupado($('#btn-emitir'), true, 'Emitiendo...');
+    servidor('apiEmitirBoleto', [PIN, ESTADO.participante.codigo, VOLUNTARIO]).then(function (r) {
+      vibrar([60, 40, 60]);
+      $('#b-nombre').textContent = r.nombre;
+      $('#b-codigo').textContent = 'Pasaporte ' + ESTADO.participante.codigo;
+      $('#b-folio').textContent = r.folio;
+      var st = (r.stands !== undefined) ? r.stands : ESTADO.stands;
+      $('#b-desglose').textContent = 'Pasó por ' + st + ' stand' + (st === 1 ? '' : 's');
+      pintarQR($('#b-qr'), r.folio);
+      $('#pantalla-recuento').classList.add('oculto');
+      $('#pantalla-boleto').classList.remove('oculto');
+      window.scrollTo(0, 0);
+    }).catch(function (e) {
+      mostrarAviso('#r-aviso', 'error', e.message);
+    }).then(function () { ocupado($('#btn-emitir'), false); });
+  }
+
+  function reiniciar() {
+    ESTADO = null;
+    $('#codigo').value = '';
+    limpiarAviso('#r-aviso');
+    $('#pantalla-recuento').classList.add('oculto');
+    $('#pantalla-boleto').classList.add('oculto');
+    $('#pantalla-buscar').classList.remove('oculto');
+    $('#codigo').focus();
+    window.scrollTo(0, 0);
+  }
+</script>
+
+</body>
+</html>
