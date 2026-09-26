@@ -147,6 +147,11 @@
   .semaforo.rojo { background: var(--rojo-claro); color: var(--rojo); }
   .semaforo.gris { background: #eceef1; color: var(--suave); }
 
+  /* Datos que llegaron de la báscula (solo lectura en el celular) */
+  .dato-bascula { display: flex; justify-content: space-between; align-items: center; gap: 10px;
+                  padding: 8px 0; border-bottom: 1px solid #eceef1; font-size: 15px; }
+  .dato-bascula b { white-space: nowrap; }
+
   .aviso { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 15px; }
   .aviso.error { background: var(--rojo-claro); color: var(--rojo); border: 1px solid #f0c4c1; }
   .aviso.exito { background: var(--verde-claro); color: var(--verde); border: 1px solid #bfe0cd; }

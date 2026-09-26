@@ -147,6 +147,11 @@
   .semaforo.rojo { background: var(--rojo-claro); color: var(--rojo); }
   .semaforo.gris { background: #eceef1; color: var(--suave); }
 
+  /* Datos que llegaron de la báscula (solo lectura en el celular) */
+  .dato-bascula { display: flex; justify-content: space-between; align-items: center; gap: 10px;
+                  padding: 8px 0; border-bottom: 1px solid #eceef1; font-size: 15px; }
+  .dato-bascula b { white-space: nowrap; }
+
   .aviso { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 15px; }
   .aviso.error { background: var(--rojo-claro); color: var(--rojo); border: 1px solid #f0c4c1; }
   .aviso.exito { background: var(--verde-claro); color: var(--verde); border: 1px solid #bfe0cd; }
@@ -690,6 +695,8 @@
   var VOLUNTARIO = '';
   var PIN = '';          // se manda en cada llamada: el servidor lo vuelve a verificar
   var ACTUAL = null;     // participante en pantalla
+  var MODO_MANUAL = false;     // en la báscula: si falla, se cargan los datos a mano
+  var RELOJ_BASCULA = null;    // en la báscula: consulta cada 5 s si ya llegó la pesada
 
   document.addEventListener('DOMContentLoaded', function () {
     $('#voluntario').value = voluntarioGuardado();
@@ -708,6 +715,7 @@
     $('#btn-siguiente').addEventListener('click', volverABuscar);
     $('#btn-salir').addEventListener('click', function () {
       if (escaneoEnCurso) escanear();   // apaga la cámara
+      detenerActualizacion();
       $('#pantalla-buscar').classList.add('oculto');
       $('#pantalla-pin').classList.remove('oculto');
     });
@@ -773,7 +781,8 @@
       $('#p-codigo').textContent = r.participante.codigo;
       $('#p-edad').textContent = r.participante.edad ? r.participante.edad + ' años' : 'edad sin registrar';
 
-      if (r.yaVisitado) {
+      MODO_MANUAL = false;
+      if (r.yaVisitado && !ESTACION.bascula) {
         mostrarAviso('#aviso-repetido', 'alerta',
           'Esta persona ya pasó por ' + ESTACION.nombre + '.' +
           (ESTACION.tipo === 'participacion' ? ' Ya quedó registrada.' : ' Podés corregir o completar los datos.'));
@@ -781,7 +790,7 @@
         limpiarAviso('#aviso-repetido');
       }
 
-      pintarCampos(r.previas || {});
+      mostrarFormulario(r);
       $('#pantalla-buscar').classList.add('oculto');
       $('#pantalla-form').classList.remove('oculto');
       window.scrollTo(0, 0);
@@ -793,6 +802,97 @@
   }
 
   // -------------------------------------------------------------------
+  function mostrarFormulario(r) {
+    detenerActualizacion();
+    if (ESTACION.bascula && !MODO_MANUAL) {
+      iniciarActualizacion();
+      pintarBascula(r);
+    } else {
+      pintarCampos(r.previas || {});
+    }
+    var soloVer = ESTACION.bascula && !MODO_MANUAL;
+    $('#btn-guardar').classList.toggle('oculto', soloVer);
+    $('#btn-cancelar').textContent = soloVer ? 'Listo · siguiente persona' : 'Cancelar';
+  }
+
+  /**
+   * La estación de la báscula: los datos los manda la PC de la báscula y
+   * quedan guardados solos. El celular solo los muestra y se actualiza cada
+   * 5 segundos; guardar desde acá volvería a cargar los mismos datos.
+   */
+  function pintarBascula(r) {
+    var previas = r.previas || {}, colores = r.previasSemaforo || {};
+    var filas = CAMPOS.filter(function (c) {
+      var v = previas[c.clave];
+      return c.tipo !== 'interno' && v !== undefined && v !== null && v !== '';
+    });
+    var hora = String(r.previasMomento || '').slice(11, 16);
+    var html = filas.length
+      ? '<div class="aviso exito">✓ La báscula ya envió los datos' + (hora ? ' (pesada de las ' + esc(hora) + ')' : '') +
+        '. Quedaron guardados: no hace falta tocar nada más.</div>'
+      : '<div class="aviso alerta">Todavía no llegó ninguna pesada de esta persona. Pesala en la PC de la báscula: ' +
+        'los datos aparecen acá solos a los pocos segundos.</div>';
+    filas.forEach(function (c) {
+      var color = colores[c.clave];
+      html += '<div class="dato-bascula"><span>' + esc(c.etiqueta) + '</span><b' +
+              (color ? ' class="semaforo ' + esc(color) + '"' : '') + '>' + esc(previas[c.clave]) +
+              (c.unidad ? ' ' + esc(c.unidad) : '') + '</b></div>';
+    });
+    html += '<p class="nota" style="margin-top:10px">' +
+            (RELOJ_BASCULA ? 'Se actualiza sola cada 5 segundos.' : 'Tocá "Actualizar" para ver si llegó una pesada nueva.') + '</p>' +
+            '<button type="button" class="ancho" id="btn-actualizar" style="margin-top:8px">🔄 Actualizar ahora</button>' +
+            '<button type="button" class="ancho gris" id="btn-manual" style="margin-top:8px">La báscula no funciona: cargar a mano</button>';
+    $('#campos').innerHTML = html;
+
+    $('#btn-actualizar').addEventListener('click', function () {
+      ocupado($('#btn-actualizar'), true, 'Actualizando...');
+      consultarBascula(true);
+    });
+    $('#btn-manual').addEventListener('click', function () {
+      MODO_MANUAL = true;
+      mostrarFormulario(ACTUAL);
+    });
+  }
+
+  var consultandoBascula = false;
+
+  /** Vuelve a pedir los datos de la persona en pantalla y repinta si sigue ahí. */
+  function consultarBascula(reiniciar) {
+    if (consultandoBascula || !ACTUAL) return;
+    consultandoBascula = true;
+    var codigo = ACTUAL.participante.codigo;
+    servidor('apiBuscar', [PIN, codigo]).then(function (r) {
+      if (!ACTUAL || ACTUAL.participante.codigo !== codigo || MODO_MANUAL) return;
+      ACTUAL = r;
+      if (reiniciar) { detenerActualizacion(); iniciarActualizacion(); }
+      pintarBascula(r);
+    }).catch(function (e) {
+      if (reiniciar) mostrarAviso('#aviso-form', 'error', e.message);
+    }).then(function () {
+      consultandoBascula = false;
+      var b = $('#btn-actualizar');
+      if (b) ocupado(b, false);
+    });
+  }
+
+  function iniciarActualizacion() {
+    var vueltas = 0;
+    RELOJ_BASCULA = setInterval(function () {
+      // 3 minutos: lo que tarda una pesada con holgura
+      if (++vueltas > 36) {
+        detenerActualizacion();
+        if (ACTUAL && !MODO_MANUAL) pintarBascula(ACTUAL);
+        return;
+      }
+      consultarBascula(false);
+    }, 5000);
+  }
+
+  function detenerActualizacion() {
+    if (RELOJ_BASCULA) clearInterval(RELOJ_BASCULA);
+    RELOJ_BASCULA = null;
+  }
+
   function pintarCampos(previas) {
     var cont = $('#campos');
     cont.innerHTML = '';
@@ -936,7 +1036,8 @@
       $('#listo-nombre').textContent = r.nombre;
       var det = [];
       if (r.guardadas) det.push(r.guardadas + ' dato' + (r.guardadas === 1 ? '' : 's') + ' guardado' + (r.guardadas === 1 ? '' : 's'));
-      else det.push('Participación registrada');
+      else if (ESTACION.tipo === 'participacion') det.push('Participación registrada');
+      else det.push('Sin cambios: los datos ya estaban guardados');
       if (r.repetido) det.push('ya había pasado por este stand');
       $('#listo-detalle').textContent = det.join(' · ');
       $('#pantalla-form').classList.add('oculto');
@@ -950,6 +1051,8 @@
   }
 
   function volverABuscar() {
+    detenerActualizacion();
+    MODO_MANUAL = false;
     ACTUAL = null;
     $('#codigo').value = '';
     $('#campos').innerHTML = '';
