@@ -125,7 +125,9 @@
   button:active { transform: translateY(1px); }
   button[disabled] { opacity: .5; cursor: not-allowed; }
   button.ancho, .boton.ancho { display: block; width: 100%; }
-  button.gris { background: #e6e8eb; color: var(--texto); }
+  button.gris, .boton.gris { background: #e6e8eb; color: var(--texto); }
+  /* Volver al menú con las tres opciones (registro, stand, salida) */
+  .boton.inicio { margin-top: 12px; text-align: center; text-decoration: none; }
   button.rojo { background: var(--rojo); }
   button.grande { padding: 18px; font-size: 18px; }
   /* Acción destacada en amarillo de marca, con texto azul para que se lea */
@@ -224,6 +226,7 @@
       <input type="text" id="voluntario" autocomplete="off" placeholder="Ej: María R.">
     </div>
     <button id="btn-pin" class="ancho grande">Entrar</button>
+    <a class="boton ancho gris inicio" target="_top" href="index.html">⌂ Volver al inicio</a>
   </div>
 
   <!-- Paso 1: escanear una credencial de la pila -->
@@ -252,6 +255,7 @@
       <h3>Cómo va la feria</h3>
       <div id="resumen" class="cargando">Cargando...</div>
     </div>
+    <a class="boton ancho gris inicio" target="_top" href="index.html">⌂ Volver al inicio</a>
   </div>
 
   <!-- Paso 2: datos de la persona -->
@@ -365,9 +369,33 @@
           else resolve(r);
         })
         .withFailureHandler(function (e) {
-          reject(new Error(e && e.message ? e.message : 'Se perdió la conexión. Revisá el internet e intentá otra vez.'));
+          reject(fallaDeRed(e && e.message ? e.message : 'Se perdió la conexión. Revisá el internet e intentá otra vez.'));
         })[fn].apply(null, args || []);
     });
+  }
+
+  /** Un error del camino (internet, Google), no del sistema: vale la pena reintentar. */
+  function fallaDeRed(mensaje) {
+    var e = new Error(mensaje);
+    e.reintentable = true;
+    return e;
+  }
+
+  /**
+   * Para consultas que solo LEEN (buscar a una persona, ver resultados).
+   * Si Google pierde la respuesta o devuelve una página de error, se vuelve a
+   * pedir sola hasta 2 veces. Nunca se usa para guardar.
+   */
+  function consultar(fn, args, alReintentar) {
+    var intentos = 0;
+    function uno() {
+      return servidor(fn, args).catch(function (e) {
+        if (!e.reintentable || ++intentos > 2) throw e;
+        if (alReintentar) alReintentar(intentos);
+        return new Promise(function (listo) { setTimeout(listo, 1500 * intentos); }).then(uno);
+      });
+    }
+    return uno();
   }
 
   // Si el internet se cuelga, el botón no puede quedar "Guardando..." para siempre
@@ -383,14 +411,14 @@
       body: JSON.stringify({ accion: 'api', fn: fn, args: args || [] }),
       signal: control ? control.signal : undefined
     }).then(function (r) {
-      if (!r.ok) throw new Error('El servidor respondió ' + r.status + '. Esperá unos segundos e intentá otra vez.');
+      if (!r.ok) throw fallaDeRed('El servidor respondió ' + r.status + '. Esperá unos segundos e intentá otra vez.');
       return r.text();
     }).then(function (t) {
       clearTimeout(reloj);
       var r;
       // Si Google devuelve una página de error en lugar de datos
       try { r = JSON.parse(t); } catch (e) {
-        throw new Error('Google no respondió bien (puede estar saturado). Esperá unos segundos e intentá otra vez.');
+        throw fallaDeRed('Google no respondió bien (puede estar saturado). Esperá unos segundos e intentá otra vez.');
       }
       if (!r || r.ok === false) throw new Error((r && r.error) || 'Error desconocido');
       return r;
@@ -401,7 +429,7 @@
                         'volvé a buscar la credencial para comprobarlo antes de repetir.');
       }
       if (e && /^El servidor respondió/.test(e.message)) throw e;
-      throw new Error('Se perdió la conexión. Revisá el internet e intentá otra vez.');
+      throw fallaDeRed('Se perdió la conexión. Revisá el internet e intentá otra vez.');
     });
   }
 
@@ -696,7 +724,8 @@
 
   /** El QR de la derecha de la credencial: abre los resultados, no es un código. */
   function esQRResultados(texto) {
-    return /[?&]p=mi(&|$)/.test(String(texto || ''));
+    // El de Apps Script (?p=mi) o el de GitHub Pages (mi.html)
+    return /[?&]p=mi(&|$)|\/mi\.html/.test(String(texto || ''));
   }
 
   /**
@@ -812,7 +841,7 @@
     limpiarAviso('#aviso-credencial');
     ocupado($('#btn-codigo'), true, 'Verificando...');
 
-    servidor('apiVerificarCredencial', [PIN, codigo]).then(function (r) {
+    consultar('apiVerificarCredencial', [PIN, codigo]).then(function (r) {
       CREDENCIAL = r;
       $('#f-numero').textContent = 'Nº ' + r.numero;
       $('#f-codigo').textContent = r.codigo;
