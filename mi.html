@@ -686,6 +686,16 @@
          (d.fechaFeria ? ' · ' + esc(d.fechaFeria) : '') + '</p>' +
          '</div>';
 
+    // Ganó en la tómbola: lo primero que ve
+    if (d.premio) {
+      h += '<div class="panel" style="text-align:center;background:var(--amarillo);border:4px solid var(--azul)">' +
+           '<div style="font-size:54px;line-height:1">🎉🏆🎉</div>' +
+           '<div style="font-size:30px;font-weight:900;color:var(--azul);margin-top:8px;letter-spacing:.04em">GANADOR DE PREMIO</div>' +
+           '<div style="font-size:20px;font-weight:700;color:var(--azul);margin-top:4px">Premio N° ' + esc(d.premio.numero) + ' de la tómbola</div>' +
+           '<div style="font-size:16px;color:var(--azul);margin-top:10px">Presentá tu credencial en la mesa de la organización para recibirlo.</div>' +
+           '</div>';
+    }
+
     // Los resultados de un menor no se leen con rangos de adulto
     if (d.menor) {
       h += '<div class="aviso alerta">Resultados de una persona menor de edad: se interpretan con tablas de crecimiento. ' +
