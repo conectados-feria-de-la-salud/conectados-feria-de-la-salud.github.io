@@ -675,6 +675,13 @@
     });
   });
 
+  /** "8586-7666" → "tel:+50685867666": al tocarlo, el celular llama. */
+  function enlaceTelefono(t) {
+    var n = String(t).replace(/[^\d+]/g, '');
+    if (/^\d{8}$/.test(n)) n = '+506' + n;     // número de Costa Rica sin código de país
+    return 'tel:' + n;
+  }
+
   function pintar(d) {
     var h = '';
 
@@ -692,7 +699,9 @@
            '<div style="font-size:54px;line-height:1">🎉🏆🎉</div>' +
            '<div style="font-size:30px;font-weight:900;color:var(--azul);margin-top:8px;letter-spacing:.04em">GANADOR DE PREMIO</div>' +
            '<div style="font-size:20px;font-weight:700;color:var(--azul);margin-top:4px">Premio N° ' + esc(d.premio.numero) + ' de la tómbola</div>' +
-           '<div style="font-size:16px;color:var(--azul);margin-top:10px">Presentá tu credencial en la mesa de la organización para recibirlo.</div>' +
+           '<div style="font-size:16px;color:var(--azul);margin-top:10px">Presentá tu credencial en la mesa de la organización para recibirlo' +
+           (d.premio.telefono ? ', o comunicate al <a href="' + esc(enlaceTelefono(d.premio.telefono)) + '" style="color:var(--azul);font-weight:900;white-space:nowrap">📞 ' +
+             esc(d.premio.telefono) + '</a>' : '') + '.</div>' +
            '</div>';
     }
 
