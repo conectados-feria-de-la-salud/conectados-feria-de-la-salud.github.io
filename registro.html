@@ -307,15 +307,6 @@
         <input type="text" id="notas" autocomplete="off" placeholder="Ej: viene con acompañante">
       </div>
 
-      <div class="panel marca">
-        <h3 style="color:var(--azul)">Consentimiento informado</h3>
-        <p id="texto-consentimiento" style="font-size:14px;margin:0 0 12px"></p>
-        <label style="display:flex;gap:10px;align-items:flex-start;font-weight:600">
-          <input type="checkbox" id="consentimiento" style="width:22px;height:22px;margin-top:2px;flex:none">
-          <span>La persona escuchó el texto y da su consentimiento</span>
-        </label>
-      </div>
-
       <button id="btn-guardar" class="ancho grande">Registrar</button>
     </div>
     <button id="btn-cancelar" class="ancho gris">Cancelar y usar otra credencial</button>
@@ -808,7 +799,6 @@
       VOLUNTARIO = vol;
       guardarVoluntario(vol);
       guardarPin(pin);
-      $('#texto-consentimiento').textContent = r.consentimiento || '';
       $('#pantalla-pin').classList.add('oculto');
       $('#pantalla-credencial').classList.remove('oculto');
       $('#codigo').focus();
@@ -867,7 +857,6 @@
       telefono: $('#telefono').value.trim(),
       correo: $('#correo').value.trim(),
       notas: $('#notas').value.trim(),
-      consentimiento: $('#consentimiento').checked,
       voluntario: VOLUNTARIO
     };
     if (datos.nombre.length < 3) {
@@ -876,10 +865,6 @@
     }
     if (datos.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.correo)) {
       mostrarAviso('#aviso-form', 'error', 'El correo no parece válido. Revisalo o dejalo vacío.');
-      return;
-    }
-    if (!datos.consentimiento) {
-      mostrarAviso('#aviso-form', 'error', 'Falta marcar el consentimiento informado.');
       return;
     }
 
@@ -903,7 +888,6 @@
     CREDENCIAL = null;
     ['#nombre', '#edad', '#telefono', '#correo', '#notas', '#codigo'].forEach(function (s) { $(s).value = ''; });
     $('#sexo').value = '';
-    $('#consentimiento').checked = false;
     limpiarAviso('#aviso-form');
     limpiarAviso('#aviso-credencial');
     $('#pantalla-form').classList.add('oculto');
